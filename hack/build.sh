@@ -83,7 +83,8 @@ yq eval -i '
 	.annotations."operators.operatorframework.io.bundle.channels.v1" = "test"
 	' "${ANNOTATIONS_PATH}"
 
-docker buildx build --push --platform="linux/amd64,linux/s390x,linux/ppc64le" -f ./bundle/Dockerfile -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
+docker buildx build -f ./bundle/Dockerfile --platform="linux/amd64,linux/s390x,linux/ppc64le" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
+docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}"
 digest "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" BUNDLE_DIGEST
 
 opm index add --build-tool docker --bundles "${BUNDLE_DIGEST}" -t "${REGISTRY}/${NAMESPACE}/container-secuirty-operator-index:${TAG}-amd64"
