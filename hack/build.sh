@@ -85,14 +85,17 @@ yq eval -i '
 docker buildx build --push -f ./bundle/Dockerfile --platform="linux/amd64,linux/s390x,linux/ppc64le" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
 digest "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" BUNDLE_DIGEST
 
-opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-secuirty-operator-index:${TAG}-amd64"
+opm index add --build-tool docker --bundles "quay.io/jcho0/container-security-operator-bundle:v1.0.6@sha256:b22522449a25ff45b4a6fe3246f1b59f93b5d7431374b0f84b2913bd460f32d7" \
+       	-t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-amd64"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-amd64"
-opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
+opm index add --build-tool docker --bundles "quay.io/jcho0/container-security-operator-bundle:v1.0.6@sha256:9165c3923287c5436284fd5c6d2fc3151b81d07a2ec9fbae423d3590cdee0eda" \
+       	-t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
-opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-ppc64le"
+opm index add --build-tool docker --bundles "quay.io/jcho0/container-security-operator-bundle:v1.0.6@sha256:9ce7c0970c9670b0ce5042d61c9f12e09dcf389efd84f9d941b4dc804f22cabf" \
+	-t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-ppc64le"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-ppc64le"
 docker manifest create --amend "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}" \
-	"${REGISTRY}/${NAMESPACE}/container-secruity-operator-index:${TAG}-amd64" \
+	"${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-amd64" \
 	"${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x" \
 	"${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-ppc64le"
 docker manifest push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}"
