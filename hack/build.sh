@@ -85,31 +85,31 @@ yq eval -i '
 docker buildx build --push -f ./bundle/Dockerfile --platform="linux/amd64,linux/s390x,linux/ppc64le" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
 digest "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" BUNDLE_DIGEST
 
-AMD64_DIGEST=$(docker manifest inspect --verbose quay.io/jcho0/container-security-operator-bundle:${TAG} | \
+AMD64_DIGEST=$(docker manifest inspect --verbose ${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG} | \
   jq -r 'if type=="object"
     then .Descriptor.digest
     else .[] | select(.Descriptor.platform.architecture=="amd64" and .Descriptor.platform.os=="linux") | .Descriptor.digest
     end')
 
-Z_DIGEST=$(docker manifest inspect --verbose quay.io/jcho0/container-security-operator-bundle:${TAG} | \
+Z_DIGEST=$(docker manifest inspect --verbose ${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG} | \
   jq -r 'if type=="object"
     then .Descriptor.digest
     else .[] | select(.Descriptor.platform.architecture=="s390x" and .Descriptor.platform.os=="linux") | .Descriptor.digest
     end')
 
-POWER_DIGEST=$(docker manifest inspect --verbose quay.io/jcho0/container-security-operator-bundle:${TAG} | \
+POWER_DIGEST=$(docker manifest inspect --verbose ${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG} | \
   jq -r 'if type=="object"
     then .Descriptor.digest
     else .[] | select(.Descriptor.platform.architecture=="ppc64le" and .Descriptor.platform.os=="linux") | .Descriptor.digest
     end')
 
-opm index add --build-tool docker --bundles "quay.io/jcho0/container-security-operator-bundle@${AMD64_DIGEST}" \
+opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle@${AMD64_DIGEST}" \
        	-t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-amd64"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-amd64"
-opm index add --build-tool docker --bundles "quay.io/jcho0/container-security-operator-bundle@${Z_DIGEST}" \
+opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle@${Z_DIGEST}" \
        	-t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
-opm index add --build-tool docker --bundles "quay.io/jcho0/container-security-operator-bundle@${POWER_DIGEST}" \
+opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle@${POWER_DIGEST}" \
 	-t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-ppc64le"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-ppc64le"
 docker manifest create --amend "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}" \
