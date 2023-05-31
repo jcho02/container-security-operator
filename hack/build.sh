@@ -25,7 +25,7 @@ set -e
 
 export OPERATOR_NAME='container-security-operator-test'
 export REGISTRY=${REGISTRY:-'quay.io'}
-export NAMESPACE=${NAMESPACE:-'projectquay'}
+export NAMESPACE=${NAMESPACE:-'jcho0'}
 export TAG=${TAG:-'v1.0.6'}
 export CSV_PATH=${CSV_PATH:-'bundle/manifests/container-security-operator.clusterserviceversion.yaml'}
 export ANNOTATIONS_PATH=${ANNOTATIONS_PATH:-'bundle/metadata/annotations.yaml'}
@@ -59,8 +59,7 @@ function digest() {
 	ret=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE}")
 }
 
-docker build -t "${REGISTRY}/${NAMESPACE}/container-security-operator:${TAG}" .
-docker push "${REGISTRY}/${NAMESPACE}/container-security-operator:${TAG}"
+docker buildx build --push --platform="linux/amd64,linux/s390x,linux/ppc64le" -t "${REGISTRY}/${NAMESPACE}/container-security-operator:${TAG}" .
 digest "${REGISTRY}/${NAMESPACE}/container-security-operator:${TAG}" OPERATOR_DIGEST
 
 # need exporting so that yq can see them
@@ -84,9 +83,17 @@ yq eval -i '
 	.annotations."operators.operatorframework.io.bundle.channels.v1" = "test"
 	' "${ANNOTATIONS_PATH}"
 
-docker build -f ./bundle/Dockerfile -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
-docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}"
+docker buildx build --push --platform="linux/amd64,linux/s390x,linux/ppc64le" -f ./bundle/Dockerfile -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
 digest "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" BUNDLE_DIGEST
 
-opm index add --build-tool docker --bundles "${BUNDLE_DIGEST}" --tag "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}"
-docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}"
+opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-secuirty-operator-index:${TAG}-amd64"
+docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-amd64"
+opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
+docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
+opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-ppc64le"
+docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-ppc64le"
+docker manifest create --amend "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}" \
+	"${REGISTRY}/${NAMESPACE}/container-secruity-operator-index:${TAG}-amd64" \
+	"${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x" \
+	"${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-ppc64le"
+docker manifest push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}"

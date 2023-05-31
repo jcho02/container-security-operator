@@ -34,7 +34,7 @@ function error {
 
 export TAG=${TAG:-'v1.0.6'}
 export CATALOG_PATH=${CATALOG_PATH:-'./bundle/cso.catalogsource.yaml'}
-export CATALOG_IMAGE=${CATALOG_IMAGE:-"quay.io/projectquay/container-security-operator-index:${TAG}"}
+export CATALOG_IMAGE=${CATALOG_IMAGE:-"quay.io/jcho0/container-security-operator-index:${TAG}"}
 export OG_PATH=${OG_PATH:-'./bundle/cso.operatorgroup.yaml'}
 export SUBSCRIPTION_PATH=${SUBSCRIPTION_PATH:-'./bundle/cso.subscription.yaml'}
 export OPERATOR_PKG_NAME=${OPERATOR_PKG_NAME:-'container-security-operator-test'}
