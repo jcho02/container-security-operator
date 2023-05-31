@@ -86,7 +86,7 @@ yq eval -i '
 docker buildx build --push --platform="linux/amd64,linux/s390x,linux/ppc64le" -f ./bundle/Dockerfile -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
 digest "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" BUNDLE_DIGEST
 
-opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-secuirty-operator-index:${TAG}-amd64"
+opm index add --build-tool docker --bundles "${BUNDLE_DIGEST}" -t "${REGISTRY}/${NAMESPACE}/container-secuirty-operator-index:${TAG}-amd64"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-amd64"
 opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
