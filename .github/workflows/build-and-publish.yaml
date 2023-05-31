@@ -8,6 +8,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
       - name: Login to Quay.io
         uses: docker/login-action@v1
         with:
