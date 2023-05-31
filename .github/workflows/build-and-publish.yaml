@@ -11,6 +11,11 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
+      - name: Install opm from OpenShift Mirror
+        uses: redhat-actions/openshift-tools-installer@v1
+        with:
+          opm: "latest"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
