@@ -77,17 +77,15 @@ yq eval -i '
 	.spec.install.spec.deployments[0].spec.template.spec.containers[0].image = strenv(OPERATOR_DIGEST)
 	' "${CSV_PATH}"
 
-cat ${CSV_PATH} > csv_file
 yq eval -i '
 	.annotations."operators.operatorframework.io.bundle.channel.default.v1" = "test" |
 	.annotations."operators.operatorframework.io.bundle.channels.v1" = "test"
 	' "${ANNOTATIONS_PATH}"
 
-docker buildx build -f ./bundle/Dockerfile --platform="linux/amd64,linux/s390x,linux/ppc64le" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
-docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}"
+docker buildx build --push -f ./bundle/Dockerfile --platform="linux/amd64,linux/s390x,linux/ppc64le" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
 digest "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" BUNDLE_DIGEST
 
-opm index add --build-tool docker --bundles "${BUNDLE_DIGEST}" -t "${REGISTRY}/${NAMESPACE}/container-secuirty-operator-index:${TAG}-amd64"
+opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-secuirty-operator-index:${TAG}-amd64"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-amd64"
 opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
 docker push "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-s390x"
