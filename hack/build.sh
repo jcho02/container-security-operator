@@ -25,7 +25,7 @@ set -e
 
 export OPERATOR_NAME='container-security-operator-test'
 export REGISTRY=${REGISTRY:-'quay.io'}
-export NAMESPACE=${NAMESPACE:-'projectquay'}
+export NAMESPACE=${NAMESPACE:-'jcho0'}
 export TAG=${TAG:-'v1.0.6'}
 export CSV_PATH=${CSV_PATH:-'bundle/manifests/container-security-operator.clusterserviceversion.yaml'}
 export ANNOTATIONS_PATH=${ANNOTATIONS_PATH:-'bundle/metadata/annotations.yaml'}
