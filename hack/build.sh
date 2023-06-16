@@ -25,7 +25,7 @@ set -e
 
 export OPERATOR_NAME='container-security-operator-test'
 export REGISTRY=${REGISTRY:-'quay.io'}
-export NAMESPACE=${NAMESPACE:-'jcho0'}
+export NAMESPACE=${NAMESPACE:-'projectquay'}
 export TAG=${TAG:-'v1.0.6'}
 export CSV_PATH=${CSV_PATH:-'bundle/manifests/container-security-operator.clusterserviceversion.yaml'}
 export ANNOTATIONS_PATH=${ANNOTATIONS_PATH:-'bundle/metadata/annotations.yaml'}
@@ -85,23 +85,12 @@ yq eval -i '
 docker buildx build --push -f ./bundle/Dockerfile --platform="linux/amd64,linux/s390x,linux/ppc64le" -t "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" ./bundle
 digest "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG}" BUNDLE_DIGEST
 
-AMD64_DIGEST=$(docker manifest inspect --verbose ${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG} | \
-  jq -r 'if type=="object"
-    then .Descriptor.digest
-    else .[] | select(.Descriptor.platform.architecture=="amd64" and .Descriptor.platform.os=="linux") | .Descriptor.digest
-    end')
-
-Z_DIGEST=$(docker manifest inspect --verbose ${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG} | \
-  jq -r 'if type=="object"
-    then .Descriptor.digest
-    else .[] | select(.Descriptor.platform.architecture=="s390x" and .Descriptor.platform.os=="linux") | .Descriptor.digest
-    end')
-
-POWER_DIGEST=$(docker manifest inspect --verbose ${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG} | \
-  jq -r 'if type=="object"
-    then .Descriptor.digest
-    else .[] | select(.Descriptor.platform.architecture=="ppc64le" and .Descriptor.platform.os=="linux") | .Descriptor.digest
-    end')
+AMD64_DIGEST=$(skopeo inspect --raw docker://${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG} | \
+	jq -r '.manifests[] | select(.platform.architecture == "amd64" and .platform.os == "linux").digest')
+POWER_DIGEST=$(skopeo inspect --raw  docker://${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG} | \
+	jq -r '.manifests[] | select(.platform.architecture == "ppc64le" and .platform.os == "linux").digest')
+Z_DIGEST=$(skopeo inspect --raw  docker://${REGISTRY}/${NAMESPACE}/container-security-operator-bundle:${TAG} | \
+	jq -r '.manifests[] | select(.platform.architecture == "s390x" and .platform.os == "linux").digest')
 
 opm index add --build-tool docker --bundles "${REGISTRY}/${NAMESPACE}/container-security-operator-bundle@${AMD64_DIGEST}" \
        	-t "${REGISTRY}/${NAMESPACE}/container-security-operator-index:${TAG}-amd64"
